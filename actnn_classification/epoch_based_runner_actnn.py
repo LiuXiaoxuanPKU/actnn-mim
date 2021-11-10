@@ -1,0 +1,39 @@
+# Copyright (c) OpenMMLab. All rights reserved.
+import time
+import torch
+
+from mmcv.runner.epoch_based_runner import EpochBasedRunner
+from mmcv.runner.builder import RUNNERS
+
+
+@RUNNERS.register_module()
+class ActNNEpochBasedRunner(EpochBasedRunner):
+
+    def train(self, data_loader, **kwargs):
+        self.model.train()
+        self.mode = 'train'
+        self.data_loader = data_loader
+        self._max_iters = self._max_epochs * len(self.data_loader)
+        self.call_hook('before_train_epoch')
+        time.sleep(2)  # Prevent possible deadlock during epoch transition
+        
+        def pack_hook(x):
+            r = self.controller.quantize(x)
+            del x
+            return r
+
+        def unpack_hook(x):
+            r = self.controller.dequantize(x)
+            del x
+            return r
+
+        with torch.autograd.graph.saved_tensors_hooks(pack_hook, unpack_hook):
+            for i, data_batch in enumerate(self.data_loader):
+                self._inner_iter = i
+                self.call_hook('before_train_iter')
+                self.run_iter(data_batch, train_mode=True, **kwargs)
+                self.call_hook('after_train_iter')
+                self._iter += 1
+
+        self.call_hook('after_train_epoch')
+        self._epoch += 1
