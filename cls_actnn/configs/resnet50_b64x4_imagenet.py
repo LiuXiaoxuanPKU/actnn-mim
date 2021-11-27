@@ -1,6 +1,5 @@
 custom_imports = dict(
     imports=[
-        'epoch_based_runner_actnn',
         'hook_actnn',
     ], allow_failed_imports=False)
 
@@ -68,14 +67,12 @@ optimizer_config = dict(grad_clip=None)
 # learning policy
 lr_config = dict(policy='step', step=[30, 60, 90])
 runner = dict(
-    type='ActNNEpochBasedRunner', max_epochs=100
+    type='EpochBasedRunner', max_epochs=100
 )
 custom_hooks = [
     dict(
         type="ActNNHook",
-        interval=1,
-        default_bit=4,
-        auto_prec=False,
+        default_bit=4
     )
 ]
 
