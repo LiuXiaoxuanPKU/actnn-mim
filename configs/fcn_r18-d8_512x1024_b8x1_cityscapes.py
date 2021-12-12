@@ -1,6 +1,7 @@
 custom_imports = dict(
     imports=[
         'hook_actnn',
+        'hook_save_gradient',
     ], allow_failed_imports=False)
 
 # model settings
@@ -51,7 +52,7 @@ model = dict(
 
 # dataset settings
 dataset_type = 'CityscapesDataset'
-data_root = 'data/cityscapes/'
+data_root = '/datasets/cityscapes/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 crop_size = (512, 1024)
@@ -125,6 +126,10 @@ custom_hooks = [
     dict(
         type="ActNNHook",
         default_bit=4,
+    ),
+    dict(
+        type="SaveGradientHook",
+        out_file="gradients/actnn_grad_4.p",
     )
 ]
 
