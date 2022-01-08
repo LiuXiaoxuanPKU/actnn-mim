@@ -47,17 +47,17 @@ data = dict(
     workers_per_gpu=2,
     train=dict(
         type=dataset_type,
-        data_prefix='data/imagenet/train',
+        data_prefix='/datasets/imagenet/train',
         pipeline=train_pipeline),
     val=dict(
         type=dataset_type,
-        data_prefix='data/imagenet/val',
+        data_prefix='/datasets/imagenet/val',
         # ann_file='data/imagenet/meta/val.txt',
         pipeline=test_pipeline),
     test=dict(
         # replace `data/val` with `data/test` for standard test
         type=dataset_type,
-        data_prefix='data/imagenet/val',
+        data_prefix='/datasets/imagenet/val',
         # ann_file='data/imagenet/meta/val.txt',
         pipeline=test_pipeline))
 
@@ -67,14 +67,8 @@ optimizer_config = dict(grad_clip=None)
 # learning policy
 lr_config = dict(policy='step', step=[30, 60, 90])
 runner = dict(
-    type='EpochBasedRunner', max_epochs=100
+    type='ActnnEpochRunner', max_epochs=100
 )
-custom_hooks = [
-    dict(
-        type="ActNNHook",
-        default_bit=4
-    )
-]
 
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
@@ -82,10 +76,10 @@ load_from = None
 resume_from = None
 workflow = [('train', 1)]
 evaluation = dict(interval=1, metric='accuracy')
-checkpoint_config = dict(interval=10)
+checkpoint_config = dict(interval=100, by_epoch=False)
 # yapf:disable
 log_config = dict(
-    interval=100,
+    interval=1,
     hooks=[
         dict(type='TextLoggerHook'),
         dict(
